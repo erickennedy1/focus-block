@@ -1,0 +1,46 @@
+name: surebet-monitor
+
+# Uma leitura a cada 30 min durante o teste. Agendamentos do GitHub só rodam no branch padrão
+# e podem atrasar alguns minutos em horários de pico.
+on:
+  schedule:
+    - cron: "7,37 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: surebet-monitor
+  cancel-in-progress: false
+
+jobs:
+  poll:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: ${{ vars.SUREBET_ENABLED == 'true' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Leitura de odds, apostas virtuais e liquidação
+        working-directory: surebet-monitor
+        env:
+          ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+          SUREBET_SPORTS: ${{ vars.SUREBET_SPORTS }}
+          SUREBET_REGIONS: ${{ vars.SUREBET_REGIONS }}
+          SUREBET_MARKETS: ${{ vars.SUREBET_MARKETS }}
+        run: python -m surebet run
+
+      - name: Salvar estado e relatório no repositório
+        run: |
+          git config user.name "surebet-monitor"
+          git config user.email "surebet-monitor@users.noreply.github.com"
+          git add surebet-monitor/data surebet-monitor/REPORT.md
+          git diff --cached --quiet && exit 0
+          git commit -m "surebet: leitura $(date -u +%Y-%m-%dT%H:%MZ)"
+          for i in 1 2 3; do git pull --rebase && git push && exit 0; sleep $((i * 5)); done
+          exit 1

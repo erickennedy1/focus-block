@@ -1,0 +1,34 @@
+{
+ "events": [
+  {
+   "id": "ev_fla_pal",
+   "sport_key": "soccer_brazil_campeonato",
+   "completed": true,
+   "scores": [
+    {
+     "name": "Flamengo",
+     "score": "2"
+    },
+    {
+     "name": "Palmeiras",
+     "score": "1"
+    }
+   ]
+  },
+  {
+   "id": "ev_ars_che",
+   "sport_key": "soccer_epl",
+   "completed": true,
+   "scores": [
+    {
+     "name": "Arsenal",
+     "score": "1"
+    },
+    {
+     "name": "Chelsea",
+     "score": "1"
+    }
+   ]
+  }
+ ]
+}
